@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Cybersecurity AI System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-shield-alt"></i> Login
+                </h4>
+                <p class="mb-0">Access your cybersecurity dashboard</p>
+            </div>
+            <div class="card-body p-4">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+                        <label class="form-check-label" for="rememberMe">
+                            Remember me
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="loginBtn">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-2">Don't have an account?</p>
+                    <a href="{{ url_for('signup') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </a>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="#" class="text-muted" id="forgotPassword">
+                        <i class="fas fa-key"></i> Forgot Password?
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Demo Credentials Card -->
+        <div class="card mt-4 border-info">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle"></i> Demo Credentials
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Email:</strong> demo@cybersecurity.com</p>
+                <p class="mb-0"><strong>Password:</strong> demo123</p>
+                <button class="btn btn-sm btn-outline-info mt-2" id="useDemoCredentials">
+                    <i class="fas fa-copy"></i> Use Demo Credentials
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Container -->
+<div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.card {
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.input-group .btn {
+    border-radius: 0 10px 10px 0;
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background-color: #2d2d2d;
+        color: #ffffff;
+    }
+    
+    .form-control {
+        background-color: #3d3d3d;
+        border-color: #555555;
+        color: #ffffff;
+    }
+    
+    .form-control:focus {
+        background-color: #3d3d3d;
+        border-color: #007bff;
+        color: #ffffff;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setupLoginForm();
+    setupEventListeners();
+});
+
+function setupLoginForm() {
+    // Check if user is already logged in
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+        window.location.href = '/';
+    }
+}
+
+function setupEventListeners() {
+    // Login form submission
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    
+    // Password visibility toggle
+    document.getElementById('togglePassword').addEventListener('click', togglePasswordVisibility);
+    
+    // Demo credentials button
+    document.getElementById('useDemoCredentials').addEventListener('click', useDemoCredentials);
+    
+    // Forgot password link
+    document.getElementById('forgotPassword').addEventListener('click', handleForgotPassword);
+}
+
+function handleLogin(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const loginData = {
+        email: formData.get('email'),
+        password: formData.get('password'),
+        rememberMe: formData.get('rememberMe') === 'on'
+    };
+    
+    // Show loading state
+    const loginBtn = document.getElementById('loginBtn');
+    const originalText = loginBtn.innerHTML;
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+    loginBtn.disabled = true;
+    
+    // Send login request
+    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Store auth token
+            localStorage.setItem('auth_token', data.token);
+            localStorage.setItem('user_info', JSON.stringify(data.user));
+            
+            showAlert('success', 'Login successful! Redirecting...');
+            
+            // Redirect to dashboard
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1500);
+        } else {
+            showAlert('danger', data.message || 'Login failed. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Login error:', error);
+        showAlert('danger', 'An error occurred during login. Please try again.');
+    })
+    .finally(() => {
+        // Reset button state
+        loginBtn.innerHTML = originalText;
+        loginBtn.disabled = false;
+    });
+}
+
+function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePassword');
+    const icon = toggleBtn.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+function useDemoCredentials() {
+    document.getElementById('email').value = 'demo@cybersecurity.com';
+    document.getElementById('password').value = 'demo123';
+    document.getElementById('rememberMe').checked = true;
+}
+
+function handleForgotPassword(e) {
+    e.preventDefault();
+    showAlert('info', 'Password reset functionality will be implemented soon.');
+}
+
+function showAlert(type, message) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertId = 'alert-' + Date.now();
+    
+    const alertHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" id="${alertId}" role="alert">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = document.getElementById(alertId);
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}
+

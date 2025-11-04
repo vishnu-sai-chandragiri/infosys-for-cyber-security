@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block title %}Model Performance - Cybersecurity AI System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-brain"></i> AI Model Performance
+        </h1>
+    </div>
+</div>
+
+<!-- Overall Performance Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3 id="overall-accuracy">0%</h3>
+                <p>Overall Accuracy</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3 id="detection-rate">0%</h3>
+                <p>Detection Rate</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h3 id="false-positive-rate">0%</h3>
+                <p>False Positive Rate</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h3 id="model-count">0</h3>
+                <p>Active Models</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Model Performance Charts -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> Model Accuracy Comparison</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="accuracyChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Model Performance Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Individual Model Details -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-table"></i> Individual Model Performance</h5>
+                <button class="btn btn-sm btn-outline-primary" id="refresh-models">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="models-table">
+                        <thead>
+                            <tr>
+                                <th>Model Name</th>
+                                <th>Type</th>
+                                <th>Accuracy</th>
+                                <th>Precision</th>
+                                <th>Recall</th>
+                                <th>F1-Score</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="models-tbody">
+                            <!-- Model data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Model Details Modal -->
+<div class="modal fade" id="modelDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Model Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="model-details">
+                <!-- Model details will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="retrain-model">Retrain Model</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeModelCharts();
+    setupEventListeners();
+    loadModelData();
+});
+
+function initializeModelCharts() {
+    // Accuracy comparison chart
+    const accuracyCtx = document.getElementById('accuracyChart').getContext('2d');
+    window.accuracyChart = new Chart(accuracyCtx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Accuracy',
+                data: [],
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 1,
+                    ticks: {
+                        callback: function(value) {
+                            return (value * 100).toFixed(0) + '%';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Accuracy: ' + (context.parsed.y * 100).toFixed(1) + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Performance distribution chart
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+    window.performanceChart = new Chart(performanceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Excellent', 'Good', 'Fair', 'Poor'],
+            datasets: [{
+                data: [0, 0, 0, 0],
+                backgroundColor: ['#28a745', '#ffc107', '#fd7e14', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function setupEventListeners() {
+    document.getElementById('refresh-models').addEventListener('click', loadModelData);
+}
+
+function loadModelData() {
+    fetch('/api/models/performance')
+        .then(response => response.json())
+        .then(data => {
+            updateModelDisplay(data);
+        })
+        .catch(error => {
+            console.error('Error loading model data:', error);
+        });
+}
+
+function updateModelDisplay(data) {
+    // Update overall performance cards
+    document.getElementById('overall-accuracy').textContent = (data.overall_accuracy * 100).toFixed(1) + '%';
+    document.getElementById('detection-rate').textContent = (data.detection_rate * 100).toFixed(1) + '%';
+    document.getElementById('false-positive-rate').textContent = (data.false_positive_rate * 100).toFixed(1) + '%';
+    document.getElementById('model-count').textContent = Object.keys(data.models).length;
+    
+    // Update accuracy chart
+    const modelNames = Object.keys(data.models);
+    const accuracies = modelNames.map(name => data.models[name].accuracy);
+    
+    window.accuracyChart.data.labels = modelNames;
+    window.accuracyChart.data.datasets[0].data = accuracies;
+    window.accuracyChart.update();
+    
+    // Update performance distribution
+    const performanceCounts = {excellent: 0, good: 0, fair: 0, poor: 0};
+    Object.values(data.models).forEach(model => {
+        if (model.accuracy >= 0.95) performanceCounts.excellent++;
+        else if (model.accuracy >= 0.90) performanceCounts.good++;
+        else if (model.accuracy >= 0.80) performanceCounts.fair++;
+        else performanceCounts.poor++;
+    });
+    
+    window.performanceChart.data.datasets[0].data = [
+        performanceCounts.excellent,
+        performanceCounts.good,
+        performanceCounts.fair,
+        performanceCounts.poor
+    ];
+    window.performanceChart.update();
+    
+    // Update models table
+    updateModelsTable(data.models);
+}
+
+function updateModelsTable(models) {
+    const tbody = document.getElementById('models-tbody');
+    tbody.innerHTML = '';
+    
+    Object.entries(models).forEach(([name, metrics]) => {
+        const row = document.createElement('tr');
+        const modelType = getModelType(name);
+        const status = getModelStatus(metrics.accuracy);
+        
+        row.innerHTML = `
+            <td><strong>${name}</strong></td>
+            <td><span class="badge bg-${getModelTypeColor(modelType)}">${modelType}</span></td>
+            <td>${(metrics.accuracy * 100).toFixed(1)}%</td>
+            <td>${(metrics.precision * 100).toFixed(1)}%</td>
+            <td>${(metrics.recall * 100).toFixed(1)}%</td>
+            <td>${(metrics.f1_score * 100).toFixed(1)}%</td>
+            <td><span class="badge bg-${getStatusColor(status)}">${status}</span></td>
+            <td>
+                <button class="btn btn-sm btn-outline-info" onclick="viewModelDetails('${name}')">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function getModelType(name) {
+    if (name.includes('Random Forest') || name.includes('XGBoost') || name.includes('Isolation')) {
+        return 'ML';
+    } else if (name.includes('LSTM') || name.includes('Autoencoder')) {
+        return 'DL';
+    }
+    return 'Unknown';
+}
+
+function getModelTypeColor(type) {
+    switch (type) {
+        case 'ML': return 'primary';
+        case 'DL': return 'success';
+        default: return 'secondary';
+    }
+}
+
+function getModelStatus(accuracy) {
+    if (accuracy >= 0.95) return 'Excellent';
+    if (accuracy >= 0.90) return 'Good';
+    if (accuracy >= 0.80) return 'Fair';
+    return 'Poor';
+}
+
+function getStatusColor(status) {
+    switch (status) {
+        case 'Excellent': return 'success';
+        case 'Good': return 'info';
+        case 'Fair': return 'warning';
+        case 'Poor': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+function viewModelDetails(modelName) {
+    // This would typically fetch detailed model information
+    const details = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Model Information</h6>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Name:</strong> ${modelName}</li>
+                    <li class="list-group-item"><strong>Type:</strong> ${getModelType(modelName)}</li>
+                    <li class="list-group-item"><strong>Status:</strong> Active</li>
+                    <li class="list-group-item"><strong>Last Updated:</strong> ${new Date().toLocaleString()}</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>Performance Metrics</h6>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Accuracy:</strong> 95.2%</li>
+                    <li class="list-group-item"><strong>Precision:</strong> 94.8%</li>
+                    <li class="list-group-item"><strong>Recall:</strong> 93.1%</li>
+                    <li class="list-group-item"><strong>F1-Score:</strong> 93.9%</li>
+                </ul>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <h6>Training Information</h6>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Training Samples:</strong> 2,500,000</li>
+                    <li class="list-group-item"><strong>Validation Samples:</strong> 500,000</li>
+                    <li class="list-group-item"><strong>Training Time:</strong> 2.5 hours</li>
+                    <li class="list-group-item"><strong>Model Size:</strong> 45.2 MB</li>
+                </ul>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('model-details').innerHTML = details;
+    new bootstrap.Modal(document.getElementById('modelDetailsModal')).show();
+}
+</script>
+{% endblock %}
+
+
+

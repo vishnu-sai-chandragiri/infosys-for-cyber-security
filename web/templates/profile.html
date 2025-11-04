@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Cybersecurity AI System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5><i class="fas fa-user-circle"></i> User Profile</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="profile-avatar mb-3">
+                            <i class="fas fa-user-circle fa-5x text-primary"></i>
+                        </div>
+                        <h5 id="user-name-display">Demo User</h5>
+                        <p class="text-muted" id="user-role-display">Security Analyst</p>
+                        <button class="btn btn-outline-primary btn-sm" id="changeAvatar">
+                            <i class="fas fa-camera"></i> Change Avatar
+                        </button>
+                    </div>
+                    <div class="col-md-8">
+                        <form id="profileForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="firstName" class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="firstName" name="firstName" value="Demo">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="lastName" class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="lastName" name="lastName" value="User">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email" value="demo@cybersecurity.com" readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="organization" class="form-label">Organization</label>
+                                <input type="text" class="form-control" id="organization" name="organization" value="Cybersecurity Demo">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="role" class="form-label">Role</label>
+                                <select class="form-select" id="role" name="role">
+                                    <option value="security_analyst" selected>Security Analyst</option>
+                                    <option value="security_manager">Security Manager</option>
+                                    <option value="system_administrator">System Administrator</option>
+                                    <option value="network_engineer">Network Engineer</option>
+                                    <option value="incident_responder">Incident Responder</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number (Optional)</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="+1 (555) 123-4567">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="bio" class="form-label">Bio (Optional)</label>
+                                <textarea class="form-control" id="bio" name="bio" rows="3" placeholder="Tell us about yourself..."></textarea>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="cancelChanges">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Account Security -->
+        <div class="card card-enhanced mt-4">
+            <div class="card-header">
+                <h6><i class="fas fa-shield-alt"></i> Account Security</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Change Password</h6>
+                        <form id="passwordForm">
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label">Current Password</label>
+                                <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="newPassword" name="newPassword">
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                            </div>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-key"></i> Change Password
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Security Settings</h6>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="twoFactor" name="twoFactor">
+                            <label class="form-check-label" for="twoFactor">
+                                Enable Two-Factor Authentication
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="emailNotifications" name="emailNotifications" checked>
+                            <label class="form-check-label" for="emailNotifications">
+                                Email Notifications
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="smsNotifications" name="smsNotifications">
+                            <label class="form-check-label" for="smsNotifications">
+                                SMS Notifications
+                            </label>
+                        </div>
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-cog"></i> Update Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity History -->
+        <div class="card card-enhanced mt-4">
+            <div class="card-header">
+                <h6><i class="fas fa-history"></i> Recent Activity</h6>
+            </div>
+            <div class="card-body">
+                <div class="activity-timeline" id="activityTimeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon bg-success">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div>Logged in successfully</div>
+                            <div class="timeline-time">2 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon bg-info">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div>Used AI Assistant</div>
+                            <div class="timeline-time">3 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon bg-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div>Viewed threat detection</div>
+                            <div class="timeline-time">5 hours ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- About Information Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> About Cybersecurity AI System</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6>System Overview</h6>
+                        <p class="text-muted">
+                            This is an advanced AI-powered cybersecurity threat detection and analysis platform designed to provide real-time monitoring, 
+                            threat intelligence, and automated response capabilities. The system combines machine learning algorithms with traditional 
+                            security tools to deliver comprehensive protection against various cyber threats.
+                        </p>
+                        
+                        <h6 class="mt-4">Key Features</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i> Real-time threat detection and monitoring</li>
+                            <li><i class="fas fa-check text-success me-2"></i> AI-powered threat analysis and classification</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Automated incident response and mitigation</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Advanced threat intelligence and reporting</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Machine learning-based anomaly detection</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Comprehensive security dashboard and analytics</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="system-icon mb-3">
+                            <i class="fas fa-robot fa-5x text-primary"></i>
+                        </div>
+                        <h6>AI-Powered Security</h6>
+                        <p class="text-muted">Advanced machine learning algorithms for threat detection</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Container -->
+<div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.profile-avatar {
+    position: relative;
+    display: inline-block;
+}
+
+.activity-timeline {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.timeline-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+}
+
+[data-theme="dark"] .timeline-item {
+    border-bottom-color: #444444;
+}
+
+.timeline-item:last-child {
+    border-bottom: none;
+}
+
+.timeline-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 0.9rem;
+    color: white;
+}
+
+.timeline-content {
+    flex: 1;
+}
+
+.timeline-time {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+[data-theme="dark"] .timeline-time {
+    color: #b0b0b0;
+}
+
+.system-icon {
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadUserProfile();
+    setupEventListeners();
+});
+
+function loadUserProfile() {
+    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+    
+    if (userInfo.firstName) {
+        document.getElementById('user-name-display').textContent = `${userInfo.firstName} ${userInfo.lastName}`;
+        document.getElementById('user-role-display').textContent = userInfo.role.replace('_', ' ').toUpperCase();
+        
+        // Populate form
+        document.getElementById('firstName').value = userInfo.firstName || '';
+        document.getElementById('lastName').value = userInfo.lastName || '';
+        document.getElementById('email').value = userInfo.email || '';
+        document.getElementById('organization').value = userInfo.organization || '';
+        document.getElementById('role').value = userInfo.role || 'security_analyst';
+    }
+}
+
+function setupEventListeners() {
+    // Profile form submission
+    document.getElementById('profileForm').addEventListener('submit', handleProfileUpdate);
+    
+    // Password form submission
+    document.getElementById('passwordForm').addEventListener('submit', handlePasswordChange);
+    
+    // Cancel button
+    document.getElementById('cancelChanges').addEventListener('click', function() {
+        loadUserProfile(); // Reload original data
+    });
+}
+
+function handleProfileUpdate(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const profileData = {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        organization: formData.get('organization'),
+        role: formData.get('role'),
+        phone: formData.get('phone'),
+        bio: formData.get('bio')
+    };
+    
+    // Update local storage
+    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+    Object.assign(userInfo, profileData);
+    localStorage.setItem('user_info', JSON.stringify(userInfo));
+    
+    // Update display
+    document.getElementById('user-name-display').textContent = `${profileData.firstName} ${profileData.lastName}`;
+    document.getElementById('user-role-display').textContent = profileData.role.replace('_', ' ').toUpperCase();
+    
+    showAlert('success', 'Profile updated successfully!');
+}
+
+function handlePasswordChange(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const currentPassword = formData.get('currentPassword');
+    const newPassword = formData.get('newPassword');
+    const confirmPassword = formData.get('confirmPassword');
+    
+    if (newPassword !== confirmPassword) {
+        showAlert('danger', 'New passwords do not match!');
+        return;
+    }
+    
+    if (newPassword.length < 8) {
+        showAlert('danger', 'New password must be at least 8 characters long!');
+        return;
+    }
+    
+    // Simulate password change
+    showAlert('success', 'Password changed successfully!');
+    e.target.reset();
+}
+
+function showAlert(type, message) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertId = 'alert-' + Date.now();
+    
+    const alertHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" id="${alertId}" role="alert">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = document.getElementById(alertId);
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

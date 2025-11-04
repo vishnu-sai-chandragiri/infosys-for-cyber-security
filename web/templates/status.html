@@ -1,0 +1,433 @@
+{% extends "base.html" %}
+
+{% block title %}System Status - Cybersecurity AI System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-server"></i> System Status & Performance
+        </h1>
+    </div>
+</div>
+
+<!-- System Status Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="system-uptime">99.9%</h4>
+                        <p class="card-text">System Uptime</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="detection-accuracy">99.8%</h4>
+                        <p class="card-text">Detection Accuracy</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-bullseye fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="response-time">&lt;2s</h4>
+                        <p class="card-text">Response Time</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-tachometer-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="active-monitoring">24/7</h4>
+                        <p class="card-text">Active Monitoring</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-eye fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Components Status -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> System Components</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Detection Engine
+                        <span id="detectionStatus">
+                            <i class="fas fa-check-circle text-success"></i> Active
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        ML Models
+                        <span id="modelsStatus">
+                            <i class="fas fa-check-circle text-success"></i> Loaded
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Database
+                        <span id="databaseStatus">
+                            <i class="fas fa-check-circle text-success"></i> Connected
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        AI Assistant
+                        <span id="aiStatus">
+                            <i class="fas fa-check-circle text-success"></i> Online
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Threat Intelligence
+                        <span id="threatIntelStatus">
+                            <i class="fas fa-check-circle text-success"></i> Updated
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Real-time Monitoring
+                        <span id="monitoringStatus">
+                            <i class="fas fa-check-circle text-success"></i> Running
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> System Performance</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Metrics -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-microchip"></i> CPU Usage</h6>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-2">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 45%" id="cpuProgress">45%</div>
+                </div>
+                <small class="text-muted">Average: 45% | Peak: 78%</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-memory"></i> Memory Usage</h6>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-2">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: 62%" id="memoryProgress">62%</div>
+                </div>
+                <small class="text-muted">Used: 4.2GB | Total: 6.8GB</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-hdd"></i> Disk Usage</h6>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-2">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: 38%" id="diskProgress">38%</div>
+                </div>
+                <small class="text-muted">Used: 380GB | Total: 1TB</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Network Statistics -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-network-wired"></i> Network Statistics</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h5 class="text-primary" id="packetsProcessed">1,234,567</h5>
+                        <small class="text-muted">Packets Processed</small>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-danger" id="threatsDetected">1,234</h5>
+                        <small class="text-muted">Threats Detected</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h5 class="text-success" id="falsePositives">23</h5>
+                        <small class="text-muted">False Positives</small>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-warning" id="processingTime">1.2ms</h5>
+                        <small class="text-muted">Avg Processing Time</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-shield-alt"></i> Security Metrics</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h5 class="text-success" id="blockedAttacks">456</h5>
+                        <small class="text-muted">Attacks Blocked</small>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-info" id="alertsGenerated">89</h5>
+                        <small class="text-muted">Alerts Generated</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h5 class="text-primary" id="threatIntelFeeds">15</h5>
+                        <small class="text-muted">Intel Feeds Active</small>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-warning" id="lastUpdate">2 min ago</h5>
+                        <small class="text-muted">Last Update</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Logs -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-file-alt"></i> Recent System Logs</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Level</th>
+                                <th>Component</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody id="systemLogs">
+                            <tr>
+                                <td>2024-01-15 14:30:25</td>
+                                <td><span class="badge bg-success">INFO</span></td>
+                                <td>Detection Engine</td>
+                                <td>System started successfully</td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-15 14:30:20</td>
+                                <td><span class="badge bg-info">DEBUG</span></td>
+                                <td>ML Models</td>
+                                <td>Models loaded and ready</td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-15 14:30:15</td>
+                                <td><span class="badge bg-success">INFO</span></td>
+                                <td>Database</td>
+                                <td>Database connection established</td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-15 14:30:10</td>
+                                <td><span class="badge bg-warning">WARN</span></td>
+                                <td>Threat Intelligence</td>
+                                <td>Feed update delayed by 30 seconds</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeStatusPage();
+});
+
+function initializeStatusPage() {
+    initializePerformanceChart();
+    startStatusUpdates();
+}
+
+function initializePerformanceChart() {
+    const ctx = document.getElementById('performanceChart');
+    if (!ctx) return;
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['CPU Usage', 'Memory Usage', 'Network I/O', 'Disk I/O'],
+            datasets: [{
+                label: 'Usage %',
+                data: [45, 62, 38, 25],
+                backgroundColor: [
+                    '#007bff',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+}
+
+function startStatusUpdates() {
+    // Update metrics every 5 seconds
+    setInterval(updateSystemMetrics, 5000);
+    
+    // Update logs every 30 seconds
+    setInterval(updateSystemLogs, 30000);
+}
+
+function updateSystemMetrics() {
+    // Update CPU usage
+    const cpuUsage = Math.floor(Math.random() * 20) + 40; // 40-60%
+    document.getElementById('cpuProgress').style.width = cpuUsage + '%';
+    document.getElementById('cpuProgress').textContent = cpuUsage + '%';
+    
+    // Update memory usage
+    const memoryUsage = Math.floor(Math.random() * 15) + 55; // 55-70%
+    document.getElementById('memoryProgress').style.width = memoryUsage + '%';
+    document.getElementById('memoryProgress').textContent = memoryUsage + '%';
+    
+    // Update disk usage
+    const diskUsage = Math.floor(Math.random() * 10) + 35; // 35-45%
+    document.getElementById('diskProgress').style.width = diskUsage + '%';
+    document.getElementById('diskProgress').textContent = diskUsage + '%';
+    
+    // Update network statistics
+    const packetsElement = document.getElementById('packetsProcessed');
+    const currentPackets = parseInt(packetsElement.textContent.replace(/,/g, '')) || 1234567;
+    packetsElement.textContent = (currentPackets + Math.floor(Math.random() * 1000) + 100).toLocaleString();
+    
+    const threatsElement = document.getElementById('threatsDetected');
+    const currentThreats = parseInt(threatsElement.textContent.replace(/,/g, '')) || 1234;
+    threatsElement.textContent = (currentThreats + Math.floor(Math.random() * 3)).toLocaleString();
+    
+    // Update last update time
+    document.getElementById('lastUpdate').textContent = 'Just now';
+}
+
+function updateSystemLogs() {
+    const logsTable = document.getElementById('systemLogs');
+    const now = new Date();
+    const timestamp = now.toISOString().replace('T', ' ').substring(0, 19);
+    
+    const logLevels = ['INFO', 'DEBUG', 'WARN', 'ERROR'];
+    const components = ['Detection Engine', 'ML Models', 'Database', 'AI Assistant', 'Threat Intelligence'];
+    const messages = [
+        'System health check completed',
+        'Threat detection cycle finished',
+        'Model prediction completed',
+        'Database query executed',
+        'AI Assistant response generated',
+        'Threat intelligence feed updated',
+        'Security scan completed',
+        'Alert processed successfully'
+    ];
+    
+    const level = logLevels[Math.floor(Math.random() * logLevels.length)];
+    const component = components[Math.floor(Math.random() * components.length)];
+    const message = messages[Math.floor(Math.random() * messages.length)];
+    
+    const levelClass = {
+        'INFO': 'bg-success',
+        'DEBUG': 'bg-info',
+        'WARN': 'bg-warning',
+        'ERROR': 'bg-danger'
+    }[level];
+    
+    const newRow = `
+        <tr>
+            <td>${timestamp}</td>
+            <td><span class="badge ${levelClass}">${level}</span></td>
+            <td>${component}</td>
+            <td>${message}</td>
+        </tr>
+    `;
+    
+    logsTable.insertAdjacentHTML('afterbegin', newRow);
+    
+    // Keep only last 10 log entries
+    const rows = logsTable.querySelectorAll('tr');
+    if (rows.length > 10) {
+        rows[rows.length - 1].remove();
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Cybersecurity AI System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </h4>
+                <p class="mb-0">Join the cybersecurity monitoring platform</p>
+            </div>
+            <div class="card-body p-4">
+                <form id="signupForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="firstName" class="form-label">
+                                    <i class="fas fa-user"></i> First Name
+                                </label>
+                                <input type="text" class="form-control" id="firstName" name="firstName" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="lastName" class="form-label">
+                                    <i class="fas fa-user"></i> Last Name
+                                </label>
+                                <input type="text" class="form-control" id="lastName" name="lastName" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                        <div class="form-text">We'll never share your email with anyone else.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="organization" class="form-label">
+                            <i class="fas fa-building"></i> Organization (Optional)
+                        </label>
+                        <input type="text" class="form-control" id="organization" name="organization">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="role" class="form-label">
+                            <i class="fas fa-briefcase"></i> Role
+                        </label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="">Select your role</option>
+                            <option value="security_analyst">Security Analyst</option>
+                            <option value="security_manager">Security Manager</option>
+                            <option value="system_administrator">System Administrator</option>
+                            <option value="network_engineer">Network Engineer</option>
+                            <option value="incident_responder">Incident Responder</option>
+                            <option value="compliance_officer">Compliance Officer</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            Password must be at least 8 characters long and contain:
+                            <ul class="mb-0 mt-1">
+                                <li id="lengthCheck" class="text-muted">• At least 8 characters</li>
+                                <li id="uppercaseCheck" class="text-muted">• One uppercase letter</li>
+                                <li id="lowercaseCheck" class="text-muted">• One lowercase letter</li>
+                                <li id="numberCheck" class="text-muted">• One number</li>
+                                <li id="specialCheck" class="text-muted">• One special character</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">
+                            <i class="fas fa-lock"></i> Confirm Password
+                        </label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                        <div id="passwordMatch" class="form-text"></div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="agreeTerms" name="agreeTerms" required>
+                        <label class="form-check-label" for="agreeTerms">
+                            I agree to the <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Privacy Policy</a>
+                        </label>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="subscribeNewsletter" name="subscribeNewsletter">
+                        <label class="form-check-label" for="subscribeNewsletter">
+                            Subscribe to security updates and newsletters
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg" id="signupBtn">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-2">Already have an account?</p>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Container -->
+<div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.card {
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.input-group .btn {
+    border-radius: 0 10px 10px 0;
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.password-requirement {
+    transition: color 0.3s ease;
+}
+
+.password-requirement.valid {
+    color: #28a745 !important;
+}
+
+.password-requirement.invalid {
+    color: #dc3545 !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background-color: #2d2d2d;
+        color: #ffffff;
+    }
+    
+    .form-control, .form-select {
+        background-color: #3d3d3d;
+        border-color: #555555;
+        color: #ffffff;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: #3d3d3d;
+        border-color: #28a745;
+        color: #ffffff;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setupSignupForm();
+    setupEventListeners();
+});
+
+function setupSignupForm() {
+    // Check if user is already logged in
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+        window.location.href = '/';
+    }
+}
+
+function setupEventListeners() {
+    // Signup form submission
+    document.getElementById('signupForm').addEventListener('submit', handleSignup);
+    
+    // Password visibility toggle
+    document.getElementById('togglePassword').addEventListener('click', togglePasswordVisibility);
+    
+    // Password validation
+    document.getElementById('password').addEventListener('input', validatePassword);
+    document.getElementById('confirmPassword').addEventListener('input', validatePasswordMatch);
+}
+
+function handleSignup(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const signupData = {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        email: formData.get('email'),
+        organization: formData.get('organization') || '',
+        role: formData.get('role'),
+        password: formData.get('password'),
+        agreeTerms: formData.get('agreeTerms') === 'on',
+        subscribeNewsletter: formData.get('subscribeNewsletter') === 'on'
+    };
+    
+    // Validate password match
+    if (signupData.password !== formData.get('confirmPassword')) {
+        showAlert('danger', 'Passwords do not match.');
+        return;
+    }
+    
+    // Validate password strength
+    if (!isPasswordValid(signupData.password)) {
+        showAlert('danger', 'Password does not meet the requirements.');
+        return;
+    }
+    
+    // Show loading state
+    const signupBtn = document.getElementById('signupBtn');
+    const originalText = signupBtn.innerHTML;
+    signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+    signupBtn.disabled = true;
+    
+    // Send signup request
+    fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(signupData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', 'Account created successfully! Please login.');
+            
+            // Redirect to login page
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+        } else {
+            showAlert('danger', data.message || 'Account creation failed. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Signup error:', error);
+        showAlert('danger', 'An error occurred during account creation. Please try again.');
+    })
+    .finally(() => {
+        // Reset button state
+        signupBtn.innerHTML = originalText;
+        signupBtn.disabled = false;
+    });
+}
+
+function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePassword');
+    const icon = toggleBtn.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+function validatePassword() {
+    const password = document.getElementById('password').value;
+    const requirements = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /\d/.test(password),
+        special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    };
+    
+    // Update requirement indicators
+    document.getElementById('lengthCheck').className = requirements.length ? 'text-success' : 'text-muted';
+    document.getElementById('uppercaseCheck').className = requirements.uppercase ? 'text-success' : 'text-muted';
+    document.getElementById('lowercaseCheck').className = requirements.lowercase ? 'text-success' : 'text-muted';
+    document.getElementById('numberCheck').className = requirements.number ? 'text-success' : 'text-muted';
+    document.getElementById('specialCheck').className = requirements.special ? 'text-success' : 'text-muted';
+    
+    // Validate password match if confirm password is filled
+    if (document.getElementById('confirmPassword').value) {
+        validatePasswordMatch();
+    }
+}
+
+function validatePasswordMatch() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const matchDiv = document.getElementById('passwordMatch');
+    
+    if (confirmPassword) {
+        if (password === confirmPassword) {
+            matchDiv.innerHTML = '<i class="fas fa-check text-success"></i> Passwords match';
+            matchDiv.className = 'form-text text-success';
+        } else {
+            matchDiv.innerHTML = '<i class="fas fa-times text-danger"></i> Passwords do not match';
+            matchDiv.className = 'form-text text-danger';
+        }
+    } else {
+        matchDiv.innerHTML = '';
+        matchDiv.className = 'form-text';
+    }
+}
+
+function isPasswordValid(password) {
+    return password.length >= 8 &&
+           /[A-Z]/.test(password) &&
+           /[a-z]/.test(password) &&
+           /\d/.test(password) &&
+           /[!@#$%^&*(),.?":{}|<>]/.test(password);
+}
+
+function showAlert(type, message) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertId = 'alert-' + Date.now();
+    
+    const alertHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" id="${alertId}" role="alert">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = document.getElementById(alertId);
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,556 @@
+{% extends "base.html" %}
+
+{% block title %}AI Assistant - Cybersecurity AI System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-robot"></i> AI Cybersecurity Assistant
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Chat Interface -->
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-comments"></i> Chat with AI Assistant</h5>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary" id="clear-chat">
+                        <i class="fas fa-trash"></i> Clear Chat
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" id="show-examples">
+                        <i class="fas fa-lightbulb"></i> Examples
+                    </button>
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <!-- Chat Messages -->
+                <div class="chat-messages flex-grow-1" id="chat-messages">
+                    <div class="message bot-message">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <i class="fas fa-robot"></i> AI Assistant
+                                <span class="message-time">Just now</span>
+                            </div>
+                            <div class="message-text">
+                                Hello! I'm your AI cybersecurity assistant. I can help you with:
+                                <ul>
+                                    <li>Current threat status and alerts</li>
+                                    <li>Detailed threat information and analysis</li>
+                                    <li>Mitigation recommendations</li>
+                                    <li>Model performance metrics</li>
+                                    <li>Historical security data</li>
+                                    <li>System status and health</li>
+                                </ul>
+                                How can I assist you today?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat Input -->
+                <div class="chat-input mt-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="chat-input" 
+                               placeholder="Ask me about threats, security status, or recommendations..." 
+                               maxlength="500">
+                        <button class="btn btn-primary" type="button" id="send-message">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                    </div>
+                    <div class="form-text">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Try asking: "What are the current threats?" or "How can I mitigate a DDoS attack?"
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions & Info -->
+    <div class="col-md-4">
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6><i class="fas fa-bolt"></i> Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm quick-action" data-query="What are the current threats?">
+                        <i class="fas fa-exclamation-triangle"></i> Current Threats
+                    </button>
+                    <button class="btn btn-outline-info btn-sm quick-action" data-query="What's the system status?">
+                        <i class="fas fa-heartbeat"></i> System Status
+                    </button>
+                    <button class="btn btn-outline-success btn-sm quick-action" data-query="Show me model performance">
+                        <i class="fas fa-chart-line"></i> Model Performance
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm quick-action" data-query="Show me historical data">
+                        <i class="fas fa-history"></i> Historical Data
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Threat Types -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6><i class="fas fa-shield-alt"></i> Threat Types</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-danger btn-sm quick-action" data-query="Tell me about DDoS attacks">
+                        <i class="fas fa-bomb"></i> DDoS
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm quick-action" data-query="What is PortScan?">
+                        <i class="fas fa-search"></i> PortScan
+                    </button>
+                    <button class="btn btn-outline-info btn-sm quick-action" data-query="Explain Bot attacks">
+                        <i class="fas fa-robot"></i> Bot
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm quick-action" data-query="What are Web Attacks?">
+                        <i class="fas fa-globe"></i> Web Attack
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Statistics -->
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-chart-bar"></i> Chat Statistics</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h5 class="text-primary" id="total-messages">0</h5>
+                        <small class="text-muted">Messages</small>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-success" id="avg-confidence">0%</h5>
+                        <small class="text-muted">Avg Confidence</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h5 class="text-info" id="response-time">0ms</h5>
+                        <small class="text-muted">Avg Response</small>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-warning" id="session-time">0m</h5>
+                        <small class="text-muted">Session Time</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Examples Modal -->
+<div class="modal fade" id="examplesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Example Queries</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-exclamation-triangle text-danger"></i> Threat Queries</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">"What are the current threats?"</li>
+                            <li class="list-group-item">"Show me recent alerts"</li>
+                            <li class="list-group-item">"Tell me about DDoS attacks"</li>
+                            <li class="list-group-item">"What is PortScan?"</li>
+                            <li class="list-group-item">"Explain Bot attacks"</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-tools text-primary"></i> Mitigation Queries</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">"How can I mitigate a DDoS attack?"</li>
+                            <li class="list-group-item">"What should I do about PortScan?"</li>
+                            <li class="list-group-item">"Recommendations for Bot traffic"</li>
+                            <li class="list-group-item">"How to prevent Web Attacks?"</li>
+                            <li class="list-group-item">"Security best practices"</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-chart-line text-success"></i> Performance Queries</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">"Show me model performance"</li>
+                            <li class="list-group-item">"What's the detection accuracy?"</li>
+                            <li class="list-group-item">"How many false positives?"</li>
+                            <li class="list-group-item">"Model comparison"</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-info-circle text-info"></i> System Queries</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">"What's the system status?"</li>
+                            <li class="list-group-item">"Show me historical data"</li>
+                            <li class="list-group-item">"System health check"</li>
+                            <li class="list-group-item">"Component status"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.chat-messages {
+    height: 400px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+}
+
+.message {
+    margin-bottom: 1rem;
+}
+
+.message-content {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.message-header {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.message-text {
+    line-height: 1.5;
+}
+
+.user-message .message-content {
+    background: #007bff;
+    color: white;
+}
+
+.user-message .message-header {
+    color: rgba(255,255,255,0.8);
+}
+
+.bot-message .message-content {
+    background: white;
+    border-left: 4px solid #28a745;
+}
+
+.typing-indicator {
+    display: none;
+    padding: 0.75rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.typing-indicator.show {
+    display: block;
+}
+
+.typing-dots {
+    display: inline-block;
+}
+
+.typing-dots::after {
+    content: '';
+    animation: typing 1.5s infinite;
+}
+
+@keyframes typing {
+    0%, 60%, 100% { content: ''; }
+    30% { content: '.'; }
+    60% { content: '..'; }
+    90% { content: '...'; }
+}
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Chatbot-specific JavaScript
+let messageCount = 0;
+let totalConfidence = 0;
+let totalResponseTime = 0;
+let sessionStartTime = Date.now();
+
+document.addEventListener('DOMContentLoaded', function() {
+    setupChatInterface();
+    setupEventListeners();
+    updateStatistics();
+});
+
+function setupChatInterface() {
+    // Join chatbot room for real-time updates
+    socket.emit('join_room', {room: 'chatbot'});
+    
+    // Load chat history
+    loadChatHistory();
+    
+    // Focus on input field
+    document.getElementById('chat-input').focus();
+    
+    // Setup auto-resize for chat messages
+    const chatMessages = document.getElementById('chat-messages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function setupEventListeners() {
+    // Send message button
+    document.getElementById('send-message').addEventListener('click', sendMessage);
+    
+    // Enter key in input field
+    document.getElementById('chat-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    // Clear chat button
+    document.getElementById('clear-chat').addEventListener('click', clearChat);
+    
+    // Show examples button
+    document.getElementById('show-examples').addEventListener('click', function() {
+        new bootstrap.Modal(document.getElementById('examplesModal')).show();
+    });
+    
+    // Quick action buttons
+    document.querySelectorAll('.quick-action').forEach(button => {
+        button.addEventListener('click', function() {
+            const query = this.getAttribute('data-query');
+            document.getElementById('chat-input').value = query;
+            sendMessage();
+        });
+    });
+}
+
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // Add user message to chat
+    addMessage(message, 'user');
+    
+    // Clear input
+    input.value = '';
+    
+    // Show typing indicator
+    showTypingIndicator();
+    
+    // Send message to backend
+    const startTime = Date.now();
+    fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            message: message,
+            user_id: 'web_user'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideTypingIndicator();
+        
+        // Add bot response to chat
+        addMessage(data.response, 'bot', data.intent, data.confidence);
+        
+        // Update statistics
+        messageCount++;
+        totalConfidence += data.confidence;
+        totalResponseTime += (Date.now() - startTime);
+        updateStatistics();
+    })
+    .catch(error => {
+        hideTypingIndicator();
+        addMessage('Sorry, I encountered an error. Please try again.', 'bot', 'error', 0);
+        console.error('Error:', error);
+    });
+}
+
+function addMessage(text, sender, intent = null, confidence = null) {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+    
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    
+    let headerContent = '';
+    if (sender === 'bot') {
+        headerContent = `<i class="fas fa-robot"></i> AI Assistant`;
+        if (intent && confidence !== null) {
+            headerContent += ` <span class="badge bg-secondary">${intent} (${(confidence * 100).toFixed(0)}%)</span>`;
+        }
+    } else {
+        headerContent = `<i class="fas fa-user"></i> You`;
+    }
+    
+    messageDiv.innerHTML = `
+        <div class="message-content">
+            <div class="message-header">
+                ${headerContent}
+                <span class="message-time">${timeString}</span>
+            </div>
+            <div class="message-text">${formatMessage(text)}</div>
+        </div>
+    `;
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function formatMessage(text) {
+    // Convert markdown-like formatting to HTML
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+    text = text.replace(/\n/g, '<br>');
+    
+    // Convert bullet points
+    text = text.replace(/^• /gm, '&bull; ');
+    
+    return text;
+}
+
+function showTypingIndicator() {
+    const chatMessages = document.getElementById('chat-messages');
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'typing-indicator show';
+    typingDiv.id = 'typing-indicator';
+    typingDiv.innerHTML = `
+        <div class="message-content">
+            <div class="message-header">
+                <i class="fas fa-robot"></i> AI Assistant
+            </div>
+            <div class="message-text">
+                <span class="typing-dots">Thinking</span>
+            </div>
+        </div>
+    `;
+    
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function hideTypingIndicator() {
+    const typingIndicator = document.getElementById('typing-indicator');
+    if (typingIndicator) {
+        typingIndicator.remove();
+    }
+}
+
+function loadChatHistory() {
+    fetch('/api/chat/history?user_id=web_user&limit=20')
+        .then(response => response.json())
+        .then(data => {
+            if (data.history && data.history.length > 0) {
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.innerHTML = '';
+                
+                data.history.forEach(entry => {
+                    // Add user message
+                    addMessage(entry.user_input, 'user');
+                    // Add bot response
+                    addMessage(entry.response, 'bot', entry.intent, entry.confidence);
+                });
+                
+                // Update statistics
+                messageCount = data.history.length;
+                totalConfidence = data.history.reduce((sum, entry) => sum + entry.confidence, 0);
+                totalResponseTime = data.history.reduce((sum, entry) => sum + entry.processing_time * 1000, 0);
+                updateStatistics();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading chat history:', error);
+        });
+}
+
+function clearChat() {
+    // Clear chat history on server
+    fetch('/api/chat/clear', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            user_id: 'web_user'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Chat history cleared:', data.message);
+    })
+    .catch(error => {
+        console.error('Error clearing chat history:', error);
+    });
+    
+    const chatMessages = document.getElementById('chat-messages');
+    chatMessages.innerHTML = `
+        <div class="message bot-message">
+            <div class="message-content">
+                <div class="message-header">
+                    <i class="fas fa-robot"></i> AI Assistant
+                    <span class="message-time">Just now</span>
+                </div>
+                <div class="message-text">
+                    Chat cleared. How can I help you today?
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Reset statistics
+    messageCount = 0;
+    totalConfidence = 0;
+    totalResponseTime = 0;
+    sessionStartTime = Date.now();
+    updateStatistics();
+}
+
+function updateStatistics() {
+    // Update message count
+    document.getElementById('total-messages').textContent = messageCount;
+    
+    // Update average confidence
+    const avgConfidence = messageCount > 0 ? (totalConfidence / messageCount) * 100 : 0;
+    document.getElementById('avg-confidence').textContent = `${avgConfidence.toFixed(0)}%`;
+    
+    // Update average response time
+    const avgResponseTime = messageCount > 0 ? totalResponseTime / messageCount : 0;
+    document.getElementById('response-time').textContent = `${avgResponseTime.toFixed(0)}ms`;
+    
+    // Update session time
+    const sessionTime = Math.floor((Date.now() - sessionStartTime) / 60000);
+    document.getElementById('session-time').textContent = `${sessionTime}m`;
+}
+</script>
+{% endblock %}
+
+
+

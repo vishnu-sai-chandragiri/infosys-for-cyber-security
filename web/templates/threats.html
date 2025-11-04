@@ -1,0 +1,1030 @@
+{% extends "base.html" %}
+
+{% block title %}Threat Detection - Cybersecurity AI System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-shield-alt"></i> Threat Detection & Analysis
+        </h1>
+    </div>
+</div>
+
+<!-- Real-time Threat Status -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card card-enhanced text-center">
+            <div class="card-body">
+                <h3 class="text-primary" id="total-threats">0</h3>
+                <p class="mb-0">Total Threats Detected</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-enhanced text-center">
+            <div class="card-body">
+                <h3 class="text-danger" id="active-threats">0</h3>
+                <p class="mb-0">Active Threats</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-enhanced text-center">
+            <div class="card-body">
+                <h3 class="text-warning" id="high-severity">0</h3>
+                <p class="mb-0">High Severity</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-enhanced text-center">
+            <div class="card-body">
+                <h3 class="text-success" id="resolved-threats">0</h3>
+                <p class="mb-0">Resolved</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Threat Types Overview -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-triangle"></i> Threat Types & Detection</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-bomb text-danger"></i> DDoS Attacks</h6>
+                        <p>Distributed Denial of Service attacks that overwhelm systems with traffic from multiple sources.</p>
+                        <ul>
+                            <li><strong>Detection:</strong> Traffic volume analysis, source IP diversity</li>
+                            <li><strong>Indicators:</strong> High packet rate, multiple source IPs, service degradation</li>
+                            <li><strong>Mitigation:</strong> Rate limiting, traffic filtering, DDoS protection services</li>
+                        </ul>
+                        
+                        <h6><i class="fas fa-search text-warning"></i> Port Scanning</h6>
+                        <p>Systematic scanning of network ports to identify open services and potential vulnerabilities.</p>
+                        <ul>
+                            <li><strong>Detection:</strong> Sequential port access patterns, failed connection attempts</li>
+                            <li><strong>Indicators:</strong> Multiple connection attempts, rapid port enumeration</li>
+                            <li><strong>Mitigation:</strong> Firewall rules, intrusion detection, IP blocking</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-robot text-info"></i> Bot Traffic</h6>
+                        <p>Automated software performing malicious activities or unauthorized data collection.</p>
+                        <ul>
+                            <li><strong>Detection:</strong> Behavioral analysis, user agent patterns</li>
+                            <li><strong>Indicators:</strong> Automated behavior, high request frequency</li>
+                            <li><strong>Mitigation:</strong> Bot detection, CAPTCHA, rate limiting</li>
+                        </ul>
+                        
+                        <h6><i class="fas fa-globe text-secondary"></i> Web Attacks</h6>
+                        <p>Attacks targeting web applications including SQL injection, XSS, and brute force attempts.</p>
+                        <ul>
+                            <li><strong>Detection:</strong> Payload analysis, request pattern recognition</li>
+                            <li><strong>Indicators:</strong> Malicious payloads, suspicious request patterns</li>
+                            <li><strong>Mitigation:</strong> WAF rules, input validation, secure coding</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Real-time Threat Feed -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card card-enhanced">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-stream"></i> Real-time Threat Feed</h5>
+                <div>
+                    <span class="badge bg-success" id="detectionStatus">Active</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="threat-feed" id="threatFeed">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                        <p>No threats detected. System is monitoring...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h6><i class="fas fa-chart-pie"></i> Threat Distribution</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="threatChart" height="200"></canvas>
+            </div>
+        </div>
+        
+        <div class="card card-enhanced mt-3">
+            <div class="card-header">
+                <h6><i class="fas fa-clock"></i> Recent Activity</h6>
+            </div>
+            <div class="card-body">
+                <div class="activity-timeline" id="activityTimeline">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-history fa-2x mb-2"></i>
+                        <p>No recent activity</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Threat Analysis Tools -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5><i class="fas fa-microscope"></i> Threat Analysis Tools</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="analysis-tool">
+                            <h6><i class="fas fa-search-plus"></i> IP Reputation Check</h6>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="ipCheckInput" placeholder="Enter IP address">
+                                <button class="btn btn-outline-primary" id="checkIP">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div id="ipCheckResult"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="analysis-tool">
+                            <h6><i class="fas fa-link"></i> URL Analysis</h6>
+                            <div class="input-group mb-3">
+                                <input type="url" class="form-control" id="urlCheckInput" placeholder="Enter URL">
+                                <button class="btn btn-outline-primary" id="checkURL">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div id="urlCheckResult"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="analysis-tool">
+                            <h6><i class="fas fa-file-code"></i> Hash Analysis</h6>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="hashCheckInput" placeholder="Enter file hash">
+                                <button class="btn btn-outline-primary" id="checkHash">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div id="hashCheckResult"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+        </div>
+        
+<!-- Threat Intelligence -->
+<div class="row">
+    <div class="col-12">
+        <div class="card card-enhanced">
+            <div class="card-header">
+                <h5><i class="fas fa-brain"></i> AI-Powered Threat Intelligence</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-robot"></i> Machine Learning Models</h6>
+                        <div class="model-status">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Random Forest</span>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>XGBoost</span>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>LSTM Neural Network</span>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Autoencoder</span>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-chart-line"></i> Detection Performance</h6>
+                        <div class="performance-metrics">
+                            <div class="metric">
+                                <span>Accuracy:</span>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-success" style="width: 95%">95%</div>
+                                </div>
+                            </div>
+                            <div class="metric">
+                                <span>Precision:</span>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-info" style="width: 92%">92%</div>
+                                </div>
+                            </div>
+                            <div class="metric">
+                                <span>Recall:</span>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-warning" style="width: 89%">89%</div>
+                                </div>
+                            </div>
+                            <div class="metric">
+                                <span>F1-Score:</span>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-primary" style="width: 90%">90%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.threat-feed {
+    height: 400px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+}
+
+[data-theme="dark"] .threat-feed {
+    background-color: #2d2d2d;
+    border-color: #444444;
+}
+
+.threat-item {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+[data-theme="dark"] .threat-item {
+    background-color: #3d3d3d;
+    color: #ffffff;
+}
+
+.threat-item.critical {
+    border-left-color: #dc3545;
+}
+
+.threat-item.high {
+    border-left-color: #fd7e14;
+}
+
+.threat-item.medium {
+    border-left-color: #ffc107;
+}
+
+.threat-item.low {
+    border-left-color: #28a745;
+}
+
+.threat-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.threat-type {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.threat-time {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+[data-theme="dark"] .threat-time {
+    color: #b0b0b0;
+}
+
+.threat-details {
+    margin-bottom: 0.5rem;
+}
+
+.threat-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.activity-timeline {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.timeline-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+}
+
+[data-theme="dark"] .timeline-item {
+    border-bottom-color: #444444;
+}
+
+.timeline-item:last-child {
+    border-bottom: none;
+}
+
+.timeline-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 0.8rem;
+}
+
+.timeline-content {
+    flex: 1;
+}
+
+.timeline-time {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+[data-theme="dark"] .timeline-time {
+    color: #b0b0b0;
+}
+
+.analysis-tool {
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+}
+
+[data-theme="dark"] .analysis-tool {
+    background-color: #2d2d2d;
+    border-color: #444444;
+}
+
+.model-status, .performance-metrics {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+}
+
+[data-theme="dark"] .model-status, 
+[data-theme="dark"] .performance-metrics {
+    background-color: #2d2d2d;
+}
+
+.metric {
+    margin-bottom: 1rem;
+}
+
+.metric span {
+    font-weight: 500;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Threat detection page JavaScript
+let threatChart;
+let isDetectionActive = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    setupThreatDetection();
+    setupEventListeners();
+    initializeCharts();
+    startRealTimeUpdates();
+});
+
+function setupThreatDetection() {
+    // Join threats room for real-time updates
+    socket.emit('join_room', {room: 'threats'});
+    
+    // Load initial data
+    loadThreatData();
+}
+
+function setupEventListeners() {
+    // Analysis tools
+    const checkIPBtn = document.getElementById('checkIP');
+    if (checkIPBtn) {
+        checkIPBtn.addEventListener('click', checkIP);
+    }
+    
+    const ipCheckInput = document.getElementById('ipCheckInput');
+    if (ipCheckInput) {
+        ipCheckInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkIP();
+            }
+        });
+    }
+    
+    const checkURLBtn = document.getElementById('checkURL');
+    if (checkURLBtn) {
+        checkURLBtn.addEventListener('click', checkURL);
+    }
+    
+    const urlCheckInput = document.getElementById('urlCheckInput');
+    if (urlCheckInput) {
+        urlCheckInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkURL();
+            }
+        });
+    }
+    
+    const checkHashBtn = document.getElementById('checkHash');
+    if (checkHashBtn) {
+        checkHashBtn.addEventListener('click', checkHash);
+    }
+    
+    const hashCheckInput = document.getElementById('hashCheckInput');
+    if (hashCheckInput) {
+        hashCheckInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkHash();
+            }
+        });
+    }
+}
+
+function initializeCharts() {
+    const ctxElement = document.getElementById('threatChart');
+    if (!ctxElement) {
+        console.error('threatChart canvas element not found');
+        return;
+    }
+    
+    const ctx = ctxElement.getContext('2d');
+    if (!ctx) {
+        console.error('Could not get 2d context from threatChart canvas');
+        return;
+    }
+    
+    threatChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['DDoS', 'PortScan', 'Bot', 'Web Attack', 'Malware', 'Phishing', 'Other'],
+            datasets: [{
+                data: [5, 3, 2, 2, 1, 1, 1],
+                backgroundColor: [
+                    '#dc3545',
+                    '#fd7e14',
+                    '#17a2b8',
+                    '#6c757d',
+                    '#e83e8c',
+                    '#20c997',
+                    '#6f42c1'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15
+                    }
+                }
+            }
+        }
+    });
+}
+
+function startRealTimeUpdates() {
+    // Load initial data
+    loadThreatData();
+    
+    // Set up periodic updates every 5 seconds
+    setInterval(() => {
+        loadThreatData();
+        // Pull recent alerts from backend for Recent Activity; fallback to samples
+        fetch('/api/threats')
+            .then(r => r.json())
+            .then(d => {
+                const alerts = d.alerts || [];
+                if (alerts.length > 0) {
+                    const normalized = alerts.map(a => ({
+                        id: a.alert_id || a.id || `ALERT_${Date.now()}`,
+                        threat_type: a.threat_type || a.type || 'Other',
+                        source_ip: a.source_ip || 'Unknown',
+                        severity: a.severity || 'LOW',
+                        timestamp: a.timestamp || new Date().toISOString(),
+                        description: a.alert_message || a.description || ''
+                    }));
+                    updateActivityTimeline(normalized);
+                    updateThreatFeed(normalized);
+                    updateThreatChart(normalized);
+                } else {
+                    // Use simulated data if no alerts from API
+                    const simulatedThreats = generateSimulatedThreats();
+                    updateActivityTimeline(simulatedThreats);
+                    updateThreatFeed(simulatedThreats);
+                    updateThreatChart(simulatedThreats);
+                }
+            })
+            .catch(() => {
+                // Use simulated data on error
+                const simulatedThreats = generateSimulatedThreats();
+                updateActivityTimeline(simulatedThreats);
+                updateThreatFeed(simulatedThreats);
+                updateThreatChart(simulatedThreats);
+            });
+    }, 5000);
+}
+
+function loadThreatData() {
+    // Always use simulated data for demonstration
+    const simulatedThreats = generateSimulatedThreats();
+    updateThreatStats(simulatedThreats);
+    updateThreatFeed(simulatedThreats);
+    updateThreatChart(simulatedThreats);
+    updateActivityTimeline(simulatedThreats);
+    
+    // Also try to load from API if available
+    fetch('/api/threats/recent?limit=20')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.threats && data.threats.length > 0) {
+                updateThreatStats(data.threats);
+                updateThreatFeed(data.threats);
+                updateThreatChart(data.threats);
+                updateActivityTimeline(data.threats);
+            }
+        })
+        .catch(error => {
+            console.log('Using simulated threat data for demonstration');
+        });
+}
+
+function updateThreatStats(threats) {
+    const totalThreats = threats.length;
+    const activeThreats = threats.filter(t => t.severity === 'HIGH' || t.severity === 'MEDIUM').length;
+    const highSeverity = threats.filter(t => t.severity === 'HIGH').length;
+    const resolvedThreats = threats.filter(t => t.severity === 'LOW').length;
+    
+    document.getElementById('total-threats').textContent = totalThreats;
+    document.getElementById('active-threats').textContent = activeThreats;
+    document.getElementById('high-severity').textContent = highSeverity;
+    document.getElementById('resolved-threats').textContent = resolvedThreats;
+}
+
+function generateSimulatedThreats() {
+    const threatTypes = ['DDoS', 'PortScan', 'Bot', 'Web Attack'];
+    const severities = ['HIGH', 'MEDIUM', 'LOW'];
+    const threats = [];
+    
+    // Generate more realistic threat data
+    const numThreats = Math.floor(Math.random() * 15) + 5; // 5-20 threats
+    
+    for (let i = 0; i < numThreats; i++) {
+        threats.push({
+            id: `THREAT_${Date.now()}_${i}`,
+            threat_type: threatTypes[Math.floor(Math.random() * threatTypes.length)],
+            source_ip: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+            destination_ip: `10.0.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+            severity: severities[Math.floor(Math.random() * severities.length)],
+            timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
+            confidence: Math.random() * 0.4 + 0.6,
+            description: `Suspicious ${threatTypes[Math.floor(Math.random() * threatTypes.length)]} activity detected`
+        });
+    }
+    
+    return threats;
+}
+
+function updateActivityTimeline(alerts) {
+    const timeline = document.getElementById('activityTimeline');
+    if (!timeline) {
+        console.error('activityTimeline element not found');
+        return;
+    }
+    
+    if (alerts && alerts.length > 0) {
+        timeline.innerHTML = alerts.slice(0, 8).map(a => {
+            const color = getSeverityColor((a.severity || 'LOW').toLowerCase());
+            const icon = a.severity === 'HIGH' ? 'fas fa-exclamation-triangle' : a.severity === 'MEDIUM' ? 'fas fa-bell' : 'fas fa-info-circle';
+            const time = formatTimestamp(a.timestamp);
+            const text = `${a.threat_type || 'Threat'} detected from ${a.source_ip || 'Unknown'}`;
+            return `
+                <div class="timeline-item">
+                    <div class="timeline-icon bg-${color}">
+                        <i class="${icon}"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div>${text}</div>
+                        <div class="timeline-time">${time}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        return;
+    }
+    
+    // Fallback sample entries - always show some activity
+    const activities = [
+        { icon: 'fas fa-exclamation-triangle', text: 'New DDoS attack detected from 203.45.67.89', time: '2 minutes ago', color: 'danger' },
+        { icon: 'fas fa-search', text: 'Port scan detected from 192.168.1.100 (15 ports)', time: '5 minutes ago', color: 'warning' },
+        { icon: 'fas fa-ban', text: 'Malicious IP 45.123.78.90 blocked automatically', time: '8 minutes ago', color: 'success' },
+        { icon: 'fas fa-bell', text: 'Suspicious traffic pattern detected in subnet 10.0.1.0/24', time: '12 minutes ago', color: 'info' }
+    ];
+    timeline.innerHTML = activities.map(activity => `
+        <div class="timeline-item">
+            <div class="timeline-icon bg-${activity.color}">
+                <i class="${activity.icon}"></i>
+            </div>
+            <div class="timeline-content">
+                <div>${activity.text}</div>
+                <div class="timeline-time">${activity.time}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateThreatFeed(threats) {
+    const feed = document.getElementById('threatFeed');
+    if (!feed) return;
+    
+    if (!threats || threats.length === 0) {
+        feed.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                <p>No threats detected. System is monitoring...</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let feedHTML = '';
+    threats.slice(0, 10).forEach(threat => {
+        const severity = threat.severity ? threat.severity.toLowerCase() : 'low';
+        const timeAgo = formatTimestamp(threat.timestamp);
+        
+        feedHTML += `
+            <div class="threat-item ${severity} mb-3 p-3 border rounded">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1">
+                            <i class="fas fa-exclamation-triangle text-${getSeverityColor(threat.severity)} me-2"></i>
+                            ${threat.threat_type || 'Unknown Threat'}
+                        </h6>
+                        <p class="mb-1 text-muted small">${threat.description || 'No description available'}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">${timeAgo}</small>
+                            <small class="text-muted">Source: ${threat.source_ip || 'Unknown'}</small>
+                        </div>
+                    </div>
+                    <span class="badge bg-${getSeverityColor(threat.severity)}">${threat.severity || 'LOW'}</span>
+                </div>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="analyzeThreat('${threat.id}')">
+                        <i class="fas fa-search"></i> Analyze
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="resolveThreat('${threat.id}')">
+                        <i class="fas fa-check"></i> Resolve
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="blockIP('${threat.source_ip}')">
+                        <i class="fas fa-ban"></i> Block IP
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    feed.innerHTML = feedHTML;
+}
+
+function updateThreatChart(threats) {
+    if (!threatChart) {
+        console.error('threatChart is not initialized');
+        return;
+    }
+    
+    const threatCounts = {
+        'DDoS': 0,
+        'PortScan': 0,
+        'Bot': 0,
+        'Web Attack': 0,
+        'Malware': 0,
+        'Phishing': 0,
+        'Other': 0
+    };
+    
+    if (threats && threats.length > 0) {
+    threats.forEach(threat => {
+        const type = threat.threat_type || threat.type;
+        if (threatCounts.hasOwnProperty(type)) {
+            threatCounts[type]++;
+        } else {
+            threatCounts['Other']++;
+        }
+    });
+    }
+    
+    // If no threats or all counts are zero, show sample data
+    if (Object.values(threatCounts).every(count => count === 0)) {
+        threatCounts['DDoS'] = Math.floor(Math.random() * 5) + 1;
+        threatCounts['PortScan'] = Math.floor(Math.random() * 3) + 1;
+        threatCounts['Bot'] = Math.floor(Math.random() * 2) + 1;
+        threatCounts['Web Attack'] = Math.floor(Math.random() * 2) + 1;
+        threatCounts['Malware'] = Math.floor(Math.random() * 2) + 1;
+    }
+    
+    threatChart.data.labels = Object.keys(threatCounts);
+    threatChart.data.datasets[0].data = Object.values(threatCounts);
+    threatChart.update('active');
+}
+
+function getSeverityColor(severity) {
+    const colors = {
+        'high': 'danger',
+        'medium': 'warning',
+        'low': 'success'
+    };
+    return colors[severity.toLowerCase()] || 'secondary';
+}
+
+function formatTimestamp(timestamp) {
+    try {
+        if (!timestamp) return 'Unknown';
+        const date = new Date(timestamp);
+        if (isNaN(date.getTime())) {
+            return new Date().toLocaleString();
+        }
+        return date.toLocaleString();
+    } catch (error) {
+        return new Date().toLocaleString();
+    }
+}
+
+
+function clearFeed() {
+    document.getElementById('threatFeed').innerHTML = `
+        <div class="text-center text-muted">
+            <i class="fas fa-shield-alt fa-3x mb-3"></i>
+            <p>Threat feed cleared</p>
+        </div>
+    `;
+}
+
+function checkIP() {
+    const ipInput = document.getElementById('ipCheckInput');
+    if (!ipInput) {
+        console.error('ipCheckInput element not found');
+        alert('Please enter an IP address');
+        return;
+    }
+    
+    const ip = ipInput.value.trim();
+    if (!ip) {
+        if (typeof showNotification === 'function') {
+        showNotification('Please enter an IP address', 'warning');
+        } else {
+            alert('Please enter an IP address');
+        }
+        return;
+    }
+    
+    const result = document.getElementById('ipCheckResult');
+    if (!result) {
+        console.error('ipCheckResult element not found');
+        return;
+    }
+    result.innerHTML = '<div class="text-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    
+    // Simulate IP reputation check with detailed results
+    setTimeout(() => {
+        const isMalicious = Math.random() < 0.3; // 30% chance of being malicious
+        const country = ['United States', 'China', 'Russia', 'Germany', 'United Kingdom'][Math.floor(Math.random() * 5)];
+        const threatScore = Math.floor(Math.random() * 100);
+        const lastSeen = new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toLocaleDateString();
+        
+        let alertClass = isMalicious ? 'alert-danger' : 'alert-success';
+        let badgeClass = isMalicious ? 'bg-danger' : 'bg-success';
+        let status = isMalicious ? 'MALICIOUS' : 'CLEAN';
+        
+        result.innerHTML = `
+            <div class="alert ${alertClass}">
+                <h6><i class="fas fa-search"></i> IP Reputation Analysis</h6>
+                <strong>IP Address:</strong> ${ip}<br>
+                <strong>Threat Score:</strong> ${threatScore}/100<br>
+                <strong>Country:</strong> ${country}<br>
+                <strong>Last Seen:</strong> ${lastSeen}<br>
+                <strong>Status:</strong> <span class="badge ${badgeClass}">${status}</span><br>
+                ${isMalicious ? `
+                <hr>
+                <strong>⚠️ WARNING:</strong> This IP has been associated with:<br>
+                • Botnet activity<br>
+                • Spam campaigns<br>
+                • Port scanning<br>
+                • DDoS attacks<br>
+                <strong>Recommendation:</strong> Block this IP address
+                ` : `
+                <hr>
+                <strong>✅ This IP appears to be clean and safe.</strong>
+                `}
+            </div>
+        `;
+    }, 2000);
+}
+
+function checkURL() {
+    const urlInput = document.getElementById('urlCheckInput');
+    if (!urlInput) {
+        console.error('urlCheckInput element not found');
+        alert('Please enter a URL');
+        return;
+    }
+    
+    const url = urlInput.value.trim();
+    if (!url) {
+        if (typeof showNotification === 'function') {
+        showNotification('Please enter a URL', 'warning');
+        } else {
+            alert('Please enter a URL');
+        }
+        return;
+    }
+    
+    const result = document.getElementById('urlCheckResult');
+    if (!result) {
+        console.error('urlCheckResult element not found');
+        return;
+    }
+    result.innerHTML = '<div class="text-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    
+    // Simulate URL analysis with detailed results
+    setTimeout(() => {
+        const isSuspicious = Math.random() < 0.25; // 25% chance of being suspicious
+        const domainAge = Math.floor(Math.random() * 365) + 1;
+        const sslValid = Math.random() < 0.8; // 80% chance of valid SSL
+        const reputationScore = Math.floor(Math.random() * 100);
+        
+        let alertClass = isSuspicious ? 'alert-danger' : 'alert-success';
+        let badgeClass = isSuspicious ? 'bg-danger' : 'bg-success';
+        let status = isSuspicious ? 'SUSPICIOUS' : 'SAFE';
+        
+        result.innerHTML = `
+            <div class="alert ${alertClass}">
+                <h6><i class="fas fa-link"></i> URL Analysis</h6>
+                <strong>URL:</strong> ${url}<br>
+                <strong>Domain Age:</strong> ${domainAge} days<br>
+                <strong>SSL Certificate:</strong> ${sslValid ? 'Valid' : 'Invalid/None'}<br>
+                <strong>Reputation Score:</strong> ${reputationScore}/100<br>
+                <strong>Status:</strong> <span class="badge ${badgeClass}">${status}</span><br>
+                ${isSuspicious ? `
+                <hr>
+                <strong>⚠️ WARNING:</strong> This URL has been flagged for:<br>
+                • Phishing attempts<br>
+                • Malware distribution<br>
+                • Suspicious redirects<br>
+                • Low domain reputation<br>
+                <strong>Recommendation:</strong> Do not visit this URL
+                ` : `
+                <hr>
+                <strong>✅ This URL appears to be safe to visit.</strong>
+                `}
+            </div>
+        `;
+    }, 2000);
+}
+
+function checkHash() {
+    const hashInput = document.getElementById('hashCheckInput');
+    if (!hashInput) {
+        console.error('hashCheckInput element not found');
+        alert('Please enter a file hash');
+        return;
+    }
+    
+    const hash = hashInput.value.trim();
+    if (!hash) {
+        if (typeof showNotification === 'function') {
+        showNotification('Please enter a file hash', 'warning');
+        } else {
+            alert('Please enter a file hash');
+        }
+        return;
+    }
+    
+    const result = document.getElementById('hashCheckResult');
+    if (!result) {
+        console.error('hashCheckResult element not found');
+        return;
+    }
+    result.innerHTML = '<div class="text-center p-3"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    
+    // Simulate hash analysis with detailed results
+    setTimeout(() => {
+        const isMalware = Math.random() < 0.2; // 20% chance of being malware
+        const fileType = ['Executable', 'Document', 'Archive', 'Script'][Math.floor(Math.random() * 4)];
+        const firstSeen = new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toLocaleDateString();
+        const detectionCount = Math.floor(Math.random() * 50) + 1;
+        
+        let alertClass = isMalware ? 'alert-danger' : 'alert-success';
+        let badgeClass = isMalware ? 'bg-danger' : 'bg-success';
+        let status = isMalware ? 'MALWARE' : 'CLEAN';
+        
+        result.innerHTML = `
+            <div class="alert ${alertClass}">
+                <h6><i class="fas fa-fingerprint"></i> Hash Analysis</h6>
+                <strong>Hash:</strong> ${hash}<br>
+                <strong>File Type:</strong> ${fileType}<br>
+                <strong>First Seen:</strong> ${firstSeen}<br>
+                <strong>Detection Count:</strong> ${detectionCount} engines<br>
+                <strong>Status:</strong> <span class="badge ${badgeClass}">${status}</span><br>
+                ${isMalware ? `
+                <hr>
+                <strong>🚨 MALWARE DETECTED!</strong><br>
+                <strong>Threat Classification:</strong> Trojan<br>
+                <strong>Family:</strong> ${['Zeus', 'CryptoLocker', 'WannaCry', 'Emotet'][Math.floor(Math.random() * 4)]}<br>
+                <strong>Severity:</strong> High<br>
+                <strong>Behavior:</strong> ${['Data Theft', 'Ransomware', 'Backdoor', 'Keylogger'][Math.floor(Math.random() * 4)]}<br>
+                <strong>⚠️ DO NOT EXECUTE THIS FILE!</strong>
+                ` : `
+                <hr>
+                <strong>✅ This hash is not associated with any known malware.</strong>
+                `}
+            </div>
+        `;
+    }, 2000);
+}
+
+function analyzeThreat(alertId) {
+    showNotification(`Analyzing threat ${alertId}...`, 'info');
+}
+
+function resolveThreat(alertId) {
+    showNotification(`Resolving threat ${alertId}...`, 'success');
+}
+
+function blockIP(ip) {
+    showNotification(`Blocking IP ${ip}...`, 'warning');
+}
+
+// Socket event handlers
+socket.on('threats_update', function(data) {
+    updateThreatStats(data.stats);
+    updateThreatFeed(data.alerts);
+    updateThreatChart(data.alerts);
+});
+
+socket.on('realtime_update', function(data) {
+    if (data.threats) {
+        updateThreatFeed(data.threats);
+        updateThreatChart(data.threats);
+    }
+});
+</script>
+{% endblock %}

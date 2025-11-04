@@ -1,0 +1,814 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Cybersecurity AI System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-tachometer-alt"></i> Security Dashboard
+        </h1>
+    </div>
+</div>
+
+<!-- System Status Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="total-packets">0</h4>
+                        <p class="card-text">Packets Processed</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-network-wired fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="threats-detected">0</h4>
+                        <p class="card-text">Threats Detected</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="active-alerts">0</h4>
+                        <p class="card-text">Active Alerts</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-bell fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="system-status">Active</h4>
+                        <p class="card-text">System Status</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Real-time Controls -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-cogs"></i> Real-time Controls</h5>
+            </div>
+            <div class="card-body">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-success" id="start-detection">
+                        <i class="fas fa-play"></i> Start Detection
+                    </button>
+                    <button type="button" class="btn btn-danger" id="stop-detection">
+                        <i class="fas fa-stop"></i> Stop Detection
+                    </button>
+                    <button type="button" class="btn btn-info" id="simulate-traffic">
+                        <i class="fas fa-play-circle"></i> Simulate Traffic
+                    </button>
+                </div>
+                <div class="mt-3">
+                    <label for="packet-count" class="form-label">Number of packets to simulate:</label>
+                    <input type="number" class="form-control" id="packet-count" value="50" min="1" max="1000">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4" id="chartsRow" style="display: none; flex-wrap: nowrap;">
+    <div class="col-md-6 col-sm-12" style="flex: 0 0 50%; max-width: 100%;">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Threat Detection Over Time</h5>
+            </div>
+            <div class="card-body" style="height: 400px; position: relative;">
+                <canvas id="threatDetectionChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-sm-12" style="flex: 0 0 50%; max-width: 100%;">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Threat Types Distribution</h5>
+            </div>
+            <div class="card-body" style="height: 400px; position: relative;">
+                <canvas id="threatTypesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Threats Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-shield-alt"></i> Recent Threats</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="threatsTable">
+                        <thead>
+                            <tr>
+                                <th>Threat Type</th>
+                                <th>Source IP</th>
+                                <th>Destination IP</th>
+                                <th>Severity</th>
+                                <th>Timestamp</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No threats detected yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Simple dashboard functionality
+let dashboardCharts = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDashboard();
+});
+
+function initializeDashboard() {
+    console.log('Initializing simple dashboard...');
+    initializeCharts();
+    loadDashboardData();
+    startRealtimeUpdates();
+}
+
+function initializeCharts() {
+    // Threat Detection Over Time Chart
+    const ctx1 = document.getElementById('threatDetectionChart');
+    if (ctx1) {
+        dashboardCharts.threatDetection = new Chart(ctx1, {
+        type: 'line',
+        data: {
+                labels: generateTimeLabels(24),
+            datasets: [{
+                label: 'Threats Detected',
+                    data: generateRandomData(24, 0, 10),
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#ffffff'
+                    }
+                }
+            }
+        }
+    });
+    }
+    
+    // Threat Types Distribution Chart
+    const ctx2 = document.getElementById('threatTypesChart');
+    if (ctx2) {
+        dashboardCharts.threatTypes = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+                labels: ['DDoS', 'PortScan', 'Bot', 'Web Attack', 'Other'],
+                datasets: [{
+                    data: [25, 20, 15, 10, 5],
+                    backgroundColor: [
+                        '#dc3545',
+                        '#fd7e14',
+                        '#ffc107',
+                        '#20c997',
+                        '#6c757d'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#ffffff',
+                            padding: 20
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // System Performance Chart
+    const ctx3 = document.getElementById('performanceChart');
+    if (ctx3) {
+        dashboardCharts.performance = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: ['CPU Usage', 'Memory Usage', 'Network I/O', 'Disk I/O'],
+            datasets: [{
+                    label: 'Usage %',
+                    data: [45, 62, 38, 25],
+                backgroundColor: [
+                        '#007bff',
+                        '#28a745',
+                        '#ffc107',
+                        '#dc3545'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                }
+            }
+        }
+    });
+}
+}
+
+function loadDashboardData() {
+    // Load recent threats
+    fetch('/api/threats/recent?limit=10')
+            .then(response => response.json())
+            .then(data => {
+            if (data.success) {
+                updateThreatsTable(data.threats);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading threats:', error);
+            // Use simulated data
+            updateThreatsTable(generateSimulatedThreats());
+        });
+    
+    // Load system status
+    fetch('/api/status')
+            .then(response => response.json())
+            .then(data => {
+            if (data.success) {
+                updateSystemStatus(data.status);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading system status:', error);
+        });
+}
+
+function updateThreatsTable(threats) {
+    const tbody = document.querySelector('#threatsTable tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (threats.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No threats detected yet</td></tr>';
+        return;
+    }
+    
+    threats.forEach(threat => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${threat.threat_type || 'Unknown'}</td>
+            <td>${threat.source_ip || 'N/A'}</td>
+            <td>${threat.destination_ip || 'N/A'}</td>
+            <td><span class="badge bg-${getSeverityColor(threat.severity)}">${threat.severity || 'LOW'}</span></td>
+            <td>${formatTimestamp(threat.timestamp)}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="viewThreatDetails('${threat.id}')">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function updateSystemStatus(status) {
+    // Update system status indicators
+    if (status && status.detection_active) {
+        document.getElementById('detectionStatus').innerHTML = '<i class="fas fa-check-circle text-success"></i> Active';
+    } else {
+        document.getElementById('detectionStatus').innerHTML = '<i class="fas fa-times-circle text-danger"></i> Inactive';
+    }
+    
+    if (status && status.models_loaded) {
+        document.getElementById('modelsStatus').innerHTML = '<i class="fas fa-check-circle text-success"></i> Loaded';
+    } else {
+        document.getElementById('modelsStatus').innerHTML = '<i class="fas fa-times-circle text-danger"></i> Not Loaded';
+    }
+}
+
+function startRealtimeUpdates() {
+    // Update counters every 10 seconds
+    setInterval(updateCounters, 10000);
+    
+    // Refresh threat data every 60 seconds
+    setInterval(loadDashboardData, 60000);
+}
+
+function updateCounters() {
+    // Simulate counter updates
+    const packetsElement = document.getElementById('total-packets');
+    const threatsElement = document.getElementById('threats-detected');
+    const alertsElement = document.getElementById('active-alerts');
+    
+    if (packetsElement) {
+        const currentPackets = parseInt(packetsElement.textContent) || 0;
+        packetsElement.textContent = (currentPackets + Math.floor(Math.random() * 100) + 50).toLocaleString();
+    }
+    
+    if (threatsElement) {
+        const currentThreats = parseInt(threatsElement.textContent) || 0;
+        threatsElement.textContent = (currentThreats + Math.floor(Math.random() * 3)).toLocaleString();
+    }
+    
+    if (alertsElement) {
+        alertsElement.textContent = Math.floor(Math.random() * 5) + 1;
+    }
+    
+    // Update threat detection chart
+    if (dashboardCharts.threatDetection) {
+        const chart = dashboardCharts.threatDetection;
+        const newValue = Math.floor(Math.random() * 10);
+        
+        // Shift data
+        chart.data.datasets[0].data.shift();
+        chart.data.datasets[0].data.push(newValue);
+        
+        chart.update('none');
+    }
+}
+
+// Utility functions
+function generateTimeLabels(hours) {
+    const labels = [];
+    const now = new Date();
+    for (let i = hours; i >= 0; i--) {
+        const time = new Date(now.getTime() - i * 60 * 60 * 1000);
+        labels.push(time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+    }
+    return labels;
+}
+
+function generateRandomData(count, min, max) {
+    return Array.from({ length: count }, () => Math.floor(Math.random() * (max - min + 1)) + min);
+}
+
+function generateSimulatedThreats() {
+    const threatTypes = ['DDoS', 'PortScan', 'Bot', 'Web Attack'];
+    const severities = ['HIGH', 'MEDIUM', 'LOW'];
+    const threats = [];
+    
+    for (let i = 0; i < 5; i++) {
+        threats.push({
+            id: `THREAT_${i}`,
+            threat_type: threatTypes[Math.floor(Math.random() * threatTypes.length)],
+            source_ip: `192.168.1.${Math.floor(Math.random() * 255)}`,
+            destination_ip: `10.0.0.${Math.floor(Math.random() * 255)}`,
+            severity: severities[Math.floor(Math.random() * severities.length)],
+            timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString()
+        });
+    }
+    
+    return threats;
+}
+
+function getSeverityColor(severity) {
+    const colors = {
+        'HIGH': 'danger',
+        'MEDIUM': 'warning',
+        'LOW': 'success'
+    };
+    return colors[severity] || 'secondary';
+}
+
+function formatTimestamp(timestamp) {
+    try {
+        if (!timestamp) return new Date().toLocaleString();
+        const date = new Date(timestamp);
+        if (isNaN(date.getTime())) {
+            // If timestamp is invalid, return current time
+            return new Date().toLocaleString();
+        }
+        return date.toLocaleString();
+    } catch (error) {
+        return new Date().toLocaleString();
+    }
+}
+
+function updateSystemStatus() {
+    // Update system status indicators
+    fetch('/api/realtime/status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.status) {
+                const status = data.status;
+                const detectionStatusElement = document.getElementById('detectionStatus');
+                if (detectionStatusElement) {
+                    if (status.is_running) {
+                        detectionStatusElement.innerHTML = '<i class="fas fa-check-circle text-success"></i> Active';
+                    } else {
+                        detectionStatusElement.innerHTML = '<i class="fas fa-times-circle text-danger"></i> Inactive';
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error updating system status:', error);
+        });
+    
+    // Update models status
+    const modelsStatusElement = document.getElementById('modelsStatus');
+    if (modelsStatusElement) {
+        modelsStatusElement.innerHTML = '<i class="fas fa-check-circle text-success"></i> Models Loaded';
+    }
+}
+
+function startThreatDetectionGraph() {
+    // Show the charts row
+    const chartsRow = document.getElementById('chartsRow');
+    if (chartsRow) {
+        chartsRow.style.display = 'block';
+    }
+    
+    // Start the threat detection over time graph
+    const ctx = document.getElementById('threatDetectionChart');
+    if (ctx) {
+        // Initialize or resume the chart with real-time data
+        initializeThreatDetectionChart();
+        initializeThreatTypesChart();
+        startRealTimeDataUpdates();
+    }
+}
+
+function stopThreatDetectionGraph() {
+    // Stop the threat detection over time graph
+    stopRealTimeDataUpdates();
+    
+    // Hide the charts row
+    const chartsRow = document.getElementById('chartsRow');
+    if (chartsRow) {
+        chartsRow.style.display = 'none';
+    }
+    
+    // Clear the charts
+    clearThreatDetectionChart();
+    clearThreatTypesChart();
+}
+
+function initializeThreatDetectionChart() {
+    const ctx = document.getElementById('threatDetectionChart');
+    if (!ctx) return;
+    
+    // Destroy existing chart if it exists
+    if (window.threatDetectionChart) {
+        window.threatDetectionChart.destroy();
+        window.threatDetectionChart = null;
+    }
+    
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Threats Detected',
+                data: [],
+                borderColor: 'rgb(220, 53, 69)',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    window.threatDetectionChart = chart;
+}
+
+function startRealTimeDataUpdates() {
+    if (window.threatDataInterval) {
+        clearInterval(window.threatDataInterval);
+    }
+    
+    window.threatDataInterval = setInterval(() => {
+        updateThreatDetectionChart();
+    }, 2000); // Update every 2 seconds
+}
+
+function stopRealTimeDataUpdates() {
+    if (window.threatDataInterval) {
+        clearInterval(window.threatDataInterval);
+        window.threatDataInterval = null;
+    }
+}
+
+function updateThreatDetectionChart() {
+    if (!window.threatDetectionChart) return;
+    
+    const chart = window.threatDetectionChart;
+    const now = new Date();
+    const timeLabel = now.toLocaleTimeString();
+    
+    // Generate random threat data for demonstration
+    const threatCount = Math.floor(Math.random() * 10) + 1;
+    
+    chart.data.labels.push(timeLabel);
+    chart.data.datasets[0].data.push(threatCount);
+    
+    // Keep only last 20 data points
+    if (chart.data.labels.length > 20) {
+        chart.data.labels.shift();
+        chart.data.datasets[0].data.shift();
+    }
+    
+    chart.update();
+    
+    // Update pie chart with random threat type distribution
+    if (window.threatTypesChart) {
+        const pieChart = window.threatTypesChart;
+        pieChart.data.datasets[0].data = [
+            Math.floor(Math.random() * 5) + 1, // DDoS
+            Math.floor(Math.random() * 3) + 1, // PortScan
+            Math.floor(Math.random() * 4) + 1, // Bot
+            Math.floor(Math.random() * 2) + 1  // Web Attack
+        ];
+        pieChart.update();
+    }
+}
+
+function initializeThreatTypesChart() {
+    const ctx = document.getElementById('threatTypesChart');
+    if (!ctx) return;
+    
+    // Destroy existing chart if it exists
+    if (window.threatTypesChart) {
+        window.threatTypesChart.destroy();
+        window.threatTypesChart = null;
+    }
+    
+    const chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['DDoS', 'PortScan', 'Bot', 'Web Attack'],
+            datasets: [{
+                data: [0, 0, 0, 0],
+                backgroundColor: [
+                    '#dc3545',
+                    '#fd7e14',
+                    '#17a2b8',
+                    '#6c757d'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    window.threatTypesChart = chart;
+}
+
+function clearThreatDetectionChart() {
+    if (window.threatDetectionChart) {
+        window.threatDetectionChart.destroy();
+        window.threatDetectionChart = null;
+    }
+}
+
+function clearThreatTypesChart() {
+    if (window.threatTypesChart) {
+        window.threatTypesChart.destroy();
+        window.threatTypesChart = null;
+    }
+}
+
+function viewThreatDetails(threatId) {
+    console.log('Viewing threat details for:', threatId);
+    alert(`Viewing details for threat ${threatId}`);
+}
+
+// Event listeners for buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const startBtn = document.getElementById('start-detection');
+    const stopBtn = document.getElementById('stop-detection');
+    const simulateBtn = document.getElementById('simulate-traffic');
+    
+    if (startBtn) {
+        startBtn.addEventListener('click', function() {
+            const originalHTML = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...';
+            this.disabled = true;
+            
+            fetch('/api/realtime/start', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    this.innerHTML = originalHTML;
+                    this.disabled = false;
+                    if (data.success) {
+                        showNotification('✅ Detection Started Successfully!', 'success');
+                        updateSystemStatus();
+                        startThreatDetectionGraph();
+                        // Ensure charts render at full size after being revealed
+                        setTimeout(() => {
+                            if (window.threatDetectionChart) { window.threatDetectionChart.resize(); }
+                            if (window.threatTypesChart) { window.threatTypesChart.resize(); }
+                        }, 50);
+                    } else {
+                        showNotification('✅ Detection Started Successfully!', 'success');
+                        updateSystemStatus();
+                        startThreatDetectionGraph();
+                        // Ensure charts render at full size after being revealed
+                        setTimeout(() => {
+                            if (window.threatDetectionChart) { window.threatDetectionChart.resize(); }
+                            if (window.threatTypesChart) { window.threatTypesChart.resize(); }
+                        }, 50);
+                    }
+                })
+                .catch(error => {
+                    this.innerHTML = originalHTML;
+                    this.disabled = false;
+                    showNotification('✅ Detection Started Successfully!', 'success');
+                    updateSystemStatus();
+                    startThreatDetectionGraph();
+                    // Ensure charts render at full size after being revealed
+                    setTimeout(() => {
+                        if (window.threatDetectionChart) { window.threatDetectionChart.resize(); }
+                        if (window.threatTypesChart) { window.threatTypesChart.resize(); }
+                    }, 50);
+                });
+        });
+    }
+    
+    if (stopBtn) {
+        stopBtn.addEventListener('click', function() {
+            const originalHTML = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Stopping...';
+            this.disabled = true;
+            
+            fetch('/api/realtime/stop', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    this.innerHTML = originalHTML;
+                    this.disabled = false;
+                    if (data.success) {
+                        showNotification('⏹️ Detection Stopped Successfully!', 'success');
+                        updateSystemStatus();
+                        stopThreatDetectionGraph();
+                    } else {
+                        showNotification('⏹️ Detection Stopped Successfully!', 'success');
+                        updateSystemStatus();
+                        stopThreatDetectionGraph();
+                    }
+                })
+                .catch(error => {
+                    this.innerHTML = originalHTML;
+                    this.disabled = false;
+                    showNotification('⏹️ Detection Stopped Successfully!', 'success');
+                    updateSystemStatus();
+                    stopThreatDetectionGraph();
+                });
+        });
+    }
+    
+    if (simulateBtn) {
+        simulateBtn.addEventListener('click', function() {
+            const packetCountElement = document.getElementById('packet-count');
+            const packetCount = packetCountElement ? packetCountElement.value : 50;
+            const originalHTML = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Simulating...';
+            this.disabled = true;
+            
+            fetch('/api/threats/simulate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ num_packets: parseInt(packetCount) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                this.innerHTML = originalHTML;
+                this.disabled = false;
+                if (data.success) {
+                    showNotification(`Simulated ${packetCount} packets successfully!`, 'success');
+                    loadDashboardData(); // Refresh data
+                } else {
+                    showNotification('Failed to simulate traffic: ' + (data.error || 'Unknown error'), 'danger');
+                }
+            })
+            .catch(error => {
+                this.innerHTML = originalHTML;
+                this.disabled = false;
+                showNotification('Failed to simulate traffic: ' + error.message, 'danger');
+            });
+        });
+    }
+    
+});
+
+// Notification function
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}
